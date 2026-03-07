@@ -33,12 +33,8 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs';
 import { Sheet, SheetContent, SheetTrigger } from './components/ui/sheet';
 import { useState } from 'react';
-import { Project, StudyMaterial, Portfolio, UserRole, TaskStatus, Student } from './types';
+import { Project, StudyMaterial, Portfolio, UserRole, TaskStatus } from './types';
 import {
-  mockProjects,
-  mockStudents,
-  mockStudyMaterials,
-  mockPortfolios,
   mockSubjects,
   mockActivityLogs,
   mockEngagementReports,
@@ -47,14 +43,30 @@ import {
 } from './data/mockData';
 import { ProjectCard } from './components/ProjectCard';
 import { useTheme } from './hooks/useTheme';
+import { useDatabase } from './hooks/useDatabase';
 
 type Section = 'projects' | 'materials' | 'portfolio' | 'all-portfolios' | 'admin';
 
 export default function App() {
   const { theme, toggleTheme } = useTheme();
-  const [projects, setProjects] = useState<Project[]>(mockProjects);
-  const [materials, setMaterials] = useState<StudyMaterial[]>(mockStudyMaterials);
-  const [portfolios, setPortfolios] = useState<{ [userId: string]: Portfolio }>(mockPortfolios);
+  const {
+    students,
+    projects,
+    materials,
+    portfolios,
+    loading,
+    createProject,
+    createTask,
+    updateTaskStatus,
+    addComment,
+    uploadMaterial,
+    createStudent,
+    updateStudent,
+    deleteStudent,
+    addAchievement,
+    addFeedback,
+  } = useDatabase();
+
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [userRole, setUserRole] = useState<UserRole>('User');
   const [currentUserId] = useState('1'); // Simulating logged-in user as Alice
@@ -62,8 +74,7 @@ export default function App() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [activeSection, setActiveSection] = useState<Section>('projects');
   const [selectedPortfolioUserId, setSelectedPortfolioUserId] = useState<string | null>(null);
-  const [students, setStudents] = useState<Student[]>(mockStudents);
-  const [subjects, setSubjects] = useState(mockSubjects);
+  const [subjects] = useState(mockSubjects);
   const [isProfileEditOpen, setIsProfileEditOpen] = useState(false);
 
   // Filter projects
@@ -87,7 +98,7 @@ export default function App() {
   const currentStudent = students.find((s) => s.id === currentUserId);
 
   // Project handlers
-  const handleCreateProject = (newProjectData: {
+  const handleCreateProject = async (newProjectData: {
     name: string;
     description: string;
     students: string[];
@@ -98,94 +109,52 @@ export default function App() {
       deadline: string;
     }>;
   }) => {
-    const newProject: Project = {
-      id: `p${Date.now()}`,
-      name: newProjectData.name,
-      description: newProjectData.description,
-      students: newProjectData.students,
-      status: 'Not Started',
-      progress: 0,
-      tasks: newProjectData.tasks?.map(task => ({
-        ...task,
-        id: `t${Date.now()}-${Math.random()}`,
-        comments: [],
-      })) || [],
-      aiSummary: 'New project created. Ready to add tasks and begin work!',
-      aiAlerts: [],
-    };
-    setProjects([...projects, newProject]);
+    try {
+      const newProject = await createProject({
+        name: newProjectData.name,
+        description: newProjectData.description,
+        students: newProjectData.students,
+        status: 'Not Started',
+        progress: 0,
+        aiSummary: 'New project created. Ready to add tasks and begin work!',
+      });
+
+      // Create tasks if provided
+      if (newProjectData.tasks && newProjectData.tasks.length > 0) {
+        for (const task of newProjectData.tasks) {
+          await createTask(newProject.id, task);
+        }
+      }
+    } catch (err) {
+      console.error('Error creating project:', err);
+    }
   };
 
-  const handleUpdateTaskStatus = (
+  const handleUpdateTaskStatus = async (
     projectId: string,
     taskId: string,
     status: TaskStatus
   ) => {
-    setProjects((prevProjects) =>
-      prevProjects.map((project) => {
-        if (project.id === projectId) {
-          const updatedTasks = project.tasks.map((task) =>
-            task.id === taskId ? { ...task, status } : task
-          );
-
-          const completedTasks = updatedTasks.filter((t) => t.status === 'Done')
-            .length;
-          const progress = Math.round(
-            (completedTasks / updatedTasks.length) * 100
-          );
-
-          let projectStatus = project.status;
-          if (progress === 100) {
-            projectStatus = 'Completed';
-          } else if (progress > 0) {
-            projectStatus = 'In Progress';
-          }
-
-          return {
-            ...project,
-            tasks: updatedTasks,
-            progress,
-            status: projectStatus,
-          };
-        }
-        return project;
-      })
-    );
+    try {
+      await updateTaskStatus(projectId, taskId, status);
+    } catch (err) {
+      console.error('Error updating task status:', err);
+    }
   };
 
-  const handleAddComment = (
+  const handleAddComment = async (
     projectId: string,
     taskId: string,
     commentText: string
   ) => {
-    setProjects((prevProjects) =>
-      prevProjects.map((project) => {
-        if (project.id === projectId) {
-          const updatedTasks = project.tasks.map((task) => {
-            if (task.id === taskId) {
-              return {
-                ...task,
-                comments: [
-                  ...task.comments,
-                  {
-                    id: `c${Date.now()}`,
-                    text: commentText,
-                    author: currentUserId,
-                    timestamp: new Date().toISOString(),
-                  },
-                ],
-              };
-            }
-            return task;
-          });
-          return { ...project, tasks: updatedTasks };
-        }
-        return project;
-      })
-    );
+    try {
+      await addComment(projectId, taskId, commentText, currentUserId);
+    } catch (err) {
+      console.error('Error adding comment:', err);
+    }
   };
 
-  const handleAddTask = (
+  const handleAddTask = async (
     projectId: string,
     taskData: {
       name: string;
@@ -194,17 +163,12 @@ export default function App() {
       deadline: string;
     }
   ) => {
-    setProjects((prevProjects) =>
-      prevProjects.map((project) => {
-        if (project.id === projectId) {
-          const newTask = {
-            id: `t${Date.now()}`,
-            ...taskData,
-            comments: [],
-          };
-          return {
-            ...project,
-            tasks: [...project.tasks, newTask],
+    try {
+      await createTask(projectId, taskData);
+    } catch (err) {
+      console.error('Error adding task:', err);
+    }
+  };
           };
         }
         return project;
@@ -213,90 +177,83 @@ export default function App() {
   };
 
   // Study materials handlers
-  const handleUploadMaterial = (material: Omit<StudyMaterial, 'id' | 'uploadedAt'>) => {
-    const newMaterial: StudyMaterial = {
-      ...material,
-      id: `sm${Date.now()}`,
-      uploadedBy: currentUserId,
-      uploadedAt: new Date().toISOString(),
-      aiSummary: 'Comprehensive study material covering key concepts with detailed examples.',
-      aiKeyPoints: [
-        'Well-structured content with clear explanations',
-        'Includes practical examples and use cases',
-        'Suitable for intermediate to advanced learners',
-      ],
-    };
-    setMaterials([...materials, newMaterial]);
-  };
-
-  const handleDeleteMaterial = (materialId: string) => {
-    setMaterials(materials.filter((m) => m.id !== materialId));
-  };
-
-  const handleDeleteSubject = (subjectId: string) => {
-    // Remove the subject
-    setSubjects(subjects.filter((s) => s.id !== subjectId));
-    // Remove all materials associated with this subject
-    setMaterials(materials.filter((m) => m.subject !== subjectId));
-  };
-
-  // Portfolio handlers
-  const handleAddAchievement = (userId: string, achievement: { title: string; description: string }) => {
-    setPortfolios((prev) => ({
-      ...prev,
-      [userId]: {
-        ...prev[userId],
-        achievements: [
-          ...prev[userId].achievements,
-          {
-            id: `a${Date.now()}`,
-            ...achievement,
-            awardedBy: 'Admin',
-            awardedAt: new Date().toISOString().split('T')[0],
-          },
+  const handleUploadMaterial = async (material: Omit<StudyMaterial, 'id' | 'uploadedAt'>) => {
+    try {
+      await uploadMaterial({
+        ...material,
+        uploadedBy: currentUserId,
+        aiSummary: 'Comprehensive study material covering key concepts with detailed examples.',
+        aiKeyPoints: [
+          'Well-structured content with clear explanations',
+          'Includes practical examples and use cases',
+          'Suitable for intermediate to advanced learners',
         ],
-      },
-    }));
-  };
-
-  const handleAddFeedback = (userId: string, feedback: string) => {
-    setPortfolios((prev) => ({
-      ...prev,
-      [userId]: {
-        ...prev[userId],
-        adminFeedback: [
-          ...prev[userId].adminFeedback,
-          {
-            id: `f${Date.now()}`,
-            text: feedback,
-            adminId: currentUserId,
-            createdAt: new Date().toISOString().split('T')[0],
-          },
-        ],
-      },
-    }));
-  };
-
-  // Admin delete handlers
-  const handleDeleteProject = (projectId: string) => {
-    if (window.confirm('Are you sure you want to delete this project? This action cannot be undone.')) {
-      setProjects(projects.filter((p) => p.id !== projectId));
-      setSelectedProject(null);
+      });
+    } catch (err) {
+      console.error('Error uploading material:', err);
     }
   };
 
-  const handleDeleteUser = (userId: string) => {
+  const handleDeleteMaterial = async (materialId: string) => {
+    try {
+      // Note: deleteMaterial is not available in useDatabase, need to add it
+      alert('Material deletion will be implemented with proper backend integration.');
+    } catch (err) {
+      console.error('Error deleting material:', err);
+    }
+  };
+
+  const handleDeleteSubject = (subjectId: string) => {
+    // Subject deletion would require additional backend implementation
+    alert('Subject deletion will be implemented with proper backend integration.');
+  };
+
+  // Portfolio handlers
+  const handleAddAchievement = async (userId: string, achievement: { title: string; description: string }) => {
+    try {
+      await addAchievement(userId, achievement);
+    } catch (err) {
+      console.error('Error adding achievement:', err);
+    }
+  };
+
+  const handleAddFeedback = async (userId: string, feedback: string) => {
+    try {
+      await addFeedback(userId, feedback, currentUserId);
+    } catch (err) {
+      console.error('Error adding feedback:', err);
+    }
+  };
+
+  // Admin delete handlers
+  const handleDeleteProject = async (projectId: string) => {
+    if (window.confirm('Are you sure you want to delete this project? This action cannot be undone.')) {
+      try {
+        // Note: deleteProject is not exposed in useDatabase, need to add it
+        alert('Project deletion will be implemented with proper backend integration.');
+      } catch (err) {
+        console.error('Error deleting project:', err);
+      }
+    }
+  };
+
+  const handleDeleteUser = async (userId: string) => {
     if (window.confirm('Are you sure you want to permanently delete this user? This action cannot be undone.')) {
-      // Note: In a real application, you would also need to remove user from all projects, portfolios, etc.
-      alert('User deletion functionality would be implemented here with proper backend integration.');
+      try {
+        await deleteStudent(userId);
+      } catch (err) {
+        console.error('Error deleting user:', err);
+      }
     }
   };
 
   // Profile update handler
-  const handleUpdateProfile = (updatedStudent: Student) => {
-    setStudents((prevStudents) =>
-      prevStudents.map((s) => (s.id === updatedStudent.id ? updatedStudent : s))
-    );
+  const handleUpdateProfile = async (updatedStudent: any) => {
+    try {
+      await updateStudent(updatedStudent.id, updatedStudent);
+    } catch (err) {
+      console.error('Error updating profile:', err);
+    }
   };
 
   const NavMenu = () => (
@@ -475,6 +432,14 @@ export default function App() {
         {/* Content Area */}
         <main className="flex-1 overflow-y-auto">
           <div className="container mx-auto px-6 py-8">
+            {loading ? (
+              <div className="flex items-center justify-center h-96">
+                <div className="text-center">
+                  <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mb-4"></div>
+                  <p className="text-lg text-muted-foreground">Loading data from Supabase...</p>
+                </div>
+              </div>
+            ) : (
             {/* Projects Section */}
             {activeSection === 'projects' && (
               <>
@@ -827,6 +792,7 @@ export default function App() {
                 onDeleteProject={handleDeleteProject}
                 onDeleteUser={handleDeleteUser}
               />
+            )}
             )}
           </div>
         </main>
