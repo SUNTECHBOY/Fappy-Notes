@@ -1,0 +1,7 @@
+id,name,subject,description,created_by,created_at,updated_at
+sg1,AI Research Circle,Artificial Intelligence,Weekly discussion group focused on recent AI research papers and breakthrough developments. We review arxiv papers and discuss implementation details.,u7,2024-09-01T10:00:00Z,2026-01-10T14:00:00Z
+sg2,Full-Stack Developers Guild,Web Development,Collaborative learning group for full-stack web development. We work on projects together and share knowledge about React, Node.js, and cloud deployment.,u1,2024-09-15T11:30:00Z,2026-01-10T14:15:00Z
+sg3,Data Science Study Team,Data Science,Study group preparing for data science interviews and working on kaggle competitions. Focus on statistics, machine learning, and data visualization.,u2,2024-10-01T09:00:00Z,2026-01-10T14:30:00Z
+sg4,Math Study Sessions,Mathematics,Peer tutoring and problem-solving sessions for advanced mathematics. Topics include linear algebra, calculus, and discrete math.,u2,2024-10-10T14:00:00Z,2026-01-10T14:45:00Z
+sg5,Cloud Architecture Meetup,Cloud Computing,Bi-weekly meetup to discuss cloud architecture patterns, share war stories, and prepare for cloud certifications (AWS, Azure, GCP).,u4,2024-10-20T15:30:00Z,2026-01-10T15:00:00Z
+sg6,Physics Problem Solving,Physics,Regular problem-solving sessions for physics courses. Collaborative approach to tackling difficult problems and understanding concepts.,u7,2024-11-01T13:00:00Z,2026-01-10T15:15:00Z

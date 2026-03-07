@@ -1,0 +1,26 @@
+id,user_id,activity_type,description,timestamp,metadata,created_at
+al1,u1,project_create,Created new project: AI Study Assistant Platform,2024-09-01T08:00:00Z,"{""project_id"": ""p1"", ""project_name"": ""AI Study Assistant Platform""}",2024-09-01T08:00:00Z
+al2,u2,project_join,Joined project: AI Study Assistant Platform,2024-09-01T08:15:00Z,"{""project_id"": ""p1"", ""project_name"": ""AI Study Assistant Platform""}",2024-09-01T08:15:00Z
+al3,u7,material_upload,Uploaded study material: Introduction to Neural Networks,2024-11-15T10:30:00Z,"{""material_id"": ""sm1"", ""subject"": ""Artificial Intelligence"", ""type"": ""PDF""}",2024-11-15T10:30:00Z
+al4,u3,project_create,Created new project: Campus Event Management System,2024-08-15T09:30:00Z,"{""project_id"": ""p2"", ""project_name"": ""Campus Event Management System""}",2024-08-15T09:30:00Z
+al5,u1,task_complete,Completed task: Build recommendation engine,2026-01-10T11:00:00Z,"{""task_id"": ""t3"", ""project_id"": ""p1""}",2026-01-10T11:00:00Z
+al6,u4,material_upload,Uploaded study material: Cloud Architecture Best Practices,2024-12-01T11:30:00Z,"{""material_id"": ""sm4"", ""subject"": ""Cloud Computing"", ""type"": ""Document""}",2024-12-01T11:30:00Z
+al7,u2,study_group_join,Joined study group: AI Research Circle,2024-09-02T09:30:00Z,"{""group_id"": ""sg1"", ""group_name"": ""AI Research Circle""}",2024-09-02T09:30:00Z
+al8,u7,study_group_create,Created study group: AI Research Circle,2024-09-01T10:00:00Z,"{""group_id"": ""sg1"", ""group_name"": ""AI Research Circle"", ""subject"": ""Artificial Intelligence""}",2024-09-01T10:00:00Z
+al9,u6,project_complete,Completed project: Campus Event Management System,2024-12-15T16:00:00Z,"{""project_id"": ""p2"", ""project_name"": ""Campus Event Management System""}",2024-12-15T16:00:00Z
+al10,u1,achievement_add,Added new achievement: AWS Solutions Architect Associate,2024-09-01T11:15:00Z,"{""achievement_id"": ""ach1"", ""title"": ""AWS Solutions Architect Associate""}",2024-09-01T11:15:00Z
+al11,u3,material_upload,Uploaded study material: Data Visualization with D3.js,2024-12-10T13:20:00Z,"{""material_id"": ""sm6"", ""subject"": ""Data Science"", ""type"": ""Video""}",2024-12-10T13:20:00Z
+al12,u2,task_create,Created task: Analyze carbon footprint,2024-11-16T11:00:00Z,"{""task_id"": ""t12"", ""project_id"": ""p3""}",2024-11-16T11:00:00Z
+al13,u4,study_group_join,Joined study group: Cloud Architecture Meetup,2024-10-20T15:30:00Z,"{""group_id"": ""sg5"", ""group_name"": ""Cloud Architecture Meetup""}",2024-10-20T15:30:00Z
+al14,u7,portfolio_update,Updated portfolio with new research paper,2024-11-10T16:00:00Z,"{""type"": ""achievement"", ""title"": ""Best Paper Award""}",2024-11-10T16:00:00Z
+al15,u1,comment_post,Posted comment on task: Build recommendation engine,2026-01-10T10:30:00Z,"{""comment_id"": ""c1"", ""task_id"": ""t3""}",2026-01-10T10:30:00Z
+al16,u6,skill_add,Added skill: React Native to portfolio,2024-09-20T14:00:00Z,"{""skill_id"": ""sk20"", ""skill_name"": ""React Native"", ""level"": ""Advanced""}",2024-09-20T14:00:00Z
+al17,u3,project_join,Joined project: Virtual Reality Lab Simulations,2024-10-05T14:15:00Z,"{""project_id"": ""p6"", ""project_name"": ""Virtual Reality Lab Simulations""}",2024-10-05T14:15:00Z
+al18,u2,material_upload,Uploaded study material: Linear Algebra Fundamentals,2024-11-25T09:15:00Z,"{""material_id"": ""sm3"", ""subject"": ""Mathematics"", ""type"": ""PDF""}",2024-11-25T09:15:00Z
+al19,u4,task_complete,Completed task: Set up backend API,2024-09-09T15:00:00Z,"{""task_id"": ""t6"", ""project_id"": ""p2""}",2024-09-09T15:00:00Z
+al20,u7,study_group_join,Joined study group: Data Science Study Team,2024-10-02T10:30:00Z,"{""group_id"": ""sg3"", ""group_name"": ""Data Science Study Team""}",2024-10-02T10:30:00Z
+al21,u1,profile_update,Updated profile photo and bio,2026-01-12T15:00:00Z,"{""fields"": [""avatar"", ""bio""]}",2026-01-12T15:00:00Z
+al22,u3,task_update,Updated task status: Create admin dashboard,2024-10-30T17:00:00Z,"{""task_id"": ""t9"", ""project_id"": ""p2"", ""new_status"": ""Completed""}",2024-10-30T17:00:00Z
+al23,u6,project_join,Joined project: Mobile Learning App,2024-11-10T11:30:00Z,"{""project_id"": ""p4"", ""project_name"": ""Mobile Learning App""}",2024-11-10T11:30:00Z
+al24,u4,achievement_add,Added new achievement: AWS Solutions Architect Professional,2024-09-15T14:15:00Z,"{""achievement_id"": ""ach10"", ""title"": ""AWS Solutions Architect Professional""}",2024-09-15T14:15:00Z
+al25,u7,material_upload,Uploaded study material: Deep Learning Architectures,2026-01-08T13:30:00Z,"{""material_id"": ""sm12"", ""subject"": ""Artificial Intelligence"", ""type"": ""PDF""}",2026-01-08T13:30:00Z

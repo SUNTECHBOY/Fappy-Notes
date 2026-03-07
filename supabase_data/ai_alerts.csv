@@ -1,0 +1,13 @@
+id,project_id,alert_text,created_at
+aia1,p1,🎯 Project is ahead of schedule! The team has completed 65% with 2 months remaining. Great momentum!,2026-01-10T09:00:00Z
+aia2,p1,💡 Recommendation: Consider adding user acceptance testing phase. With core features nearly complete current timeline allows for quality assurance.,2026-01-10T09:05:00Z
+aia3,p1,⚠️ Task dependency alert: 'Conduct user testing sessions' is blocked. Ensure UI mockups are finalized first.,2026-01-10T09:10:00Z
+aia4,p3,📊 Data analysis task is taking longer than expected. Consider adding another team member with data science expertise.,2026-01-08T10:00:00Z
+aia5,p3,🌟 Strong research foundation! Team has collected comprehensive data. Ready for analysis and visualization phase.,2026-01-08T10:05:00Z
+aia6,p5,🔒 Security audit is upcoming. Ensure smart contracts are thoroughly tested before scheduling external review.,2026-01-09T11:00:00Z
+aia7,p5,✅ Excellent progress on blockchain implementation! Smart contract deployment successful. Team collaboration is strong.,2026-01-09T11:05:00Z
+aia8,p5,💬 Suggestion: Document the credential verification API for easier integration with existing systems.,2026-01-09T11:10:00Z
+aia9,p6,🎮 VR simulations are showing promise! Consider optimizing for lower-end hardware to improve accessibility.,2026-01-07T12:00:00Z
+aia10,p6,🚀 Physics simulations are progressing well. Team should focus on user experience refinement for VR interactions.,2026-01-07T12:05:00Z
+aia11,p4,📱 Project kickoff delayed. Recommend scheduling initial planning meeting to establish clear roadmap.,2024-11-15T14:00:00Z
+aia12,p2,🎉 Project completed successfully! All features delivered on time. Excellent teamwork and execution!,2024-12-15T16:00:00Z

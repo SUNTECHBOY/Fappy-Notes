@@ -1,0 +1,9 @@
+id,name,icon,color,materials_count,created_at,updated_at
+sub1,Computer Science,💻,#3b82f6,12,2024-08-01T08:00:00Z,2026-01-10T14:00:00Z
+sub2,Mathematics,📐,#ef4444,8,2024-08-01T08:15:00Z,2026-01-10T14:15:00Z
+sub3,Physics,⚛️,#8b5cf6,6,2024-08-01T08:30:00Z,2026-01-10T14:30:00Z
+sub4,Data Science,📊,#10b981,10,2024-08-01T08:45:00Z,2026-01-10T14:45:00Z
+sub5,Artificial Intelligence,🤖,#f59e0b,15,2024-08-01T09:00:00Z,2026-01-10T15:00:00Z
+sub6,Web Development,🌐,#06b6d4,9,2024-08-01T09:15:00Z,2026-01-10T15:15:00Z
+sub7,Machine Learning,🧠,#ec4899,11,2024-08-01T09:30:00Z,2026-01-10T15:30:00Z
+sub8,Cloud Computing,☁️,#6366f1,7,2024-08-01T09:45:00Z,2026-01-10T15:45:00Z

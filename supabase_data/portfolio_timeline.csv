@@ -1,0 +1,31 @@
+id,user_id,date,title,description,type,created_at,updated_at
+tl1,u1,2022-09,Graduated with Computer Science Degree,Completed Bachelor of Science in Computer Science with honors. GPA: 3.8/4.0. Focus on software engineering and AI.,Education,2024-09-01T10:45:00Z,2024-09-01T10:45:00Z
+tl2,u1,2023-01,Started as Full-Stack Developer,Joined TechCorp as a full-stack developer working on customer-facing web applications. Leading frontend architecture decisions.,Work,2024-09-01T10:50:00Z,2024-09-01T10:50:00Z
+tl3,u1,2023-08,AWS Solutions Architect Certification,Earned AWS Solutions Architect Associate certification. Deepened knowledge of cloud architecture and best practices.,Certification,2024-09-01T10:55:00Z,2024-09-01T10:55:00Z
+tl4,u1,2024-03,Published Technical Article,Wrote article on React performance optimization that received 10k+ views on Medium. Shared lessons from production experience.,Achievement,2024-09-01T11:00:00Z,2024-09-01T11:00:00Z
+tl5,u1,2024-09,Promoted to Senior Developer,Promoted to Senior Full-Stack Developer. Now mentoring junior developers and leading sprint planning.,Work,2024-09-01T11:05:00Z,2024-09-01T11:05:00Z
+tl6,u2,2021-06,Completed Data Science Bootcamp,Intensive 12-week bootcamp covering statistics, machine learning, and data visualization. Graduated top of class.,Education,2024-09-05T11:45:00Z,2024-09-05T11:45:00Z
+tl7,u2,2022-01,Started PhD in Machine Learning,Began doctoral studies in Machine Learning at State University. Research focus on interpretable AI and fairness.,Education,2024-09-05T11:50:00Z,2024-09-05T11:50:00Z
+tl8,u2,2023-06,Research Paper Published,Published paper on fairness in ML models at NeurIPS conference. Presented findings to international audience.,Achievement,2024-09-05T11:55:00Z,2024-09-05T11:55:00Z
+tl9,u2,2024-01,Teaching Assistant Position,Appointed as TA for Advanced Machine Learning course. Teaching 60+ graduate students.,Work,2024-09-05T12:00:00Z,2024-09-05T12:00:00Z
+tl10,u2,2024-08,Won Kaggle Competition,Placed 3rd in international Kaggle competition for image segmentation. Prize: $5000.,Achievement,2024-09-05T12:05:00Z,2024-09-05T12:05:00Z
+tl11,u3,2020-05,Graduated Design School,Completed Bachelor of Fine Arts in Digital Design. Specialized in UX/UI and interactive design.,Education,2024-09-10T12:45:00Z,2024-09-10T12:45:00Z
+tl12,u3,2020-09,UX Designer at StartupCo,Joined fast-growing startup as first design hire. Established design system and user research processes.,Work,2024-09-10T12:50:00Z,2024-09-10T12:50:00Z
+tl13,u3,2021-06,Led Complete Redesign,Led product redesign that increased user engagement by 45%. Conducted 30+ user interviews and usability tests.,Achievement,2024-09-10T12:55:00Z,2024-09-10T12:55:00Z
+tl14,u3,2022-03,Adobe XD Certification,Earned Adobe Certified Professional in XD. Mastered advanced prototyping and collaboration features.,Certification,2024-09-10T13:00:00Z,2024-09-10T13:00:00Z
+tl15,u3,2024-05,Senior UX Designer,Promoted to Senior UX Designer. Leading design for new product line serving enterprise customers.,Work,2024-09-10T13:05:00Z,2024-09-10T13:05:00Z
+tl16,u4,2020-01,Computer Engineering Degree,Graduated with B.S. in Computer Engineering. Specialized in distributed systems and cloud computing.,Education,2024-09-15T13:45:00Z,2024-09-15T13:45:00Z
+tl17,u4,2020-06,Backend Engineer at CloudTech,Started as backend engineer building microservices architecture. Working with Java and Spring Boot.,Work,2024-09-15T13:50:00Z,2024-09-15T13:50:00Z
+tl18,u4,2021-08,Kubernetes Certification,Earned Certified Kubernetes Administrator (CKA) certification. Now managing production k8s clusters.,Certification,2024-09-15T13:55:00Z,2024-09-15T13:55:00Z
+tl19,u4,2023-02,Cloud Architect Role,Transitioned to Cloud Architect role. Designing infrastructure for applications serving millions of users.,Work,2024-09-15T14:00:00Z,2024-09-15T14:00:00Z
+tl20,u4,2024-06,AWS Solutions Architect Pro,Achieved AWS Solutions Architect Professional certification. Highest level AWS architecture certification.,Certification,2024-09-15T14:05:00Z,2024-09-15T14:05:00Z
+tl21,u6,2021-09,Mobile Development Bootcamp,Completed intensive mobile development program. Built 5 apps in 3 months using React Native and Flutter.,Education,2024-09-20T14:45:00Z,2024-09-20T14:45:00Z
+tl22,u6,2022-03,Mobile Developer at AppStudio,Joined AppStudio as mobile developer. Building cross-platform apps for healthcare and fitness clients.,Work,2024-09-20T14:50:00Z,2024-09-20T14:50:00Z
+tl23,u6,2023-01,First App Published,Published first solo app to App Store and Google Play. Reached 10k downloads in first month.,Achievement,2024-09-20T14:55:00Z,2024-09-20T14:55:00Z
+tl24,u6,2024-04,Tech Conference Speaker,Spoke at React Native EU conference about performance optimization. Presentation viewed by 5k+ developers.,Achievement,2024-09-20T15:00:00Z,2024-09-20T15:00:00Z
+tl25,u7,2019-05,Mathematics Degree,Completed B.S. in Applied Mathematics with focus on statistics and computational methods.,Education,2024-09-25T15:45:00Z,2024-09-25T15:45:00Z
+tl26,u7,2020-01,Master's in Data Science,Earned M.S. in Data Science. Thesis on explainable AI in healthcare applications.,Education,2024-09-25T15:50:00Z,2024-09-25T15:50:00Z
+tl27,u7,2020-08,AI Research Scientist,Started as Research Scientist at AI Lab. Working on fairness and interpretability in machine learning.,Work,2024-09-25T15:55:00Z,2024-09-25T15:55:00Z
+tl28,u7,2022-06,Multiple Research Papers,Published 4 peer-reviewed papers in top ML conferences (NeurIPS, ICML). Cited 200+ times.,Achievement,2024-09-25T16:00:00Z,2024-09-25T16:00:00Z
+tl29,u7,2023-09,PhD Candidacy,Advanced to PhD candidacy. Dissertation on ethical AI and algorithmic fairness.,Education,2024-09-25T16:05:00Z,2024-09-25T16:05:00Z
+tl30,u7,2024-11,Best Paper Award,Received Best Paper Award at AI Ethics conference for work on bias detection in neural networks.,Achievement,2024-09-25T16:10:00Z,2024-09-25T16:10:00Z
