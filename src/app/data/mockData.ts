@@ -268,6 +268,7 @@ export const mockStudyMaterials = [
     uploadedAt: '2026-01-05T10:00:00Z',
     type: 'PDF' as const,
     size: '2.5 MB',
+    url: 'https://storage.supabase.co/materials/introduction-to-machine-learning.pdf',
     aiSummary: 'Comprehensive introduction to machine learning fundamentals',
     aiKeyPoints: [
       'Core ML algorithms explained',
@@ -284,6 +285,7 @@ export const mockStudyMaterials = [
     uploadedAt: '2025-11-15T10:30:00Z',
     type: 'PDF' as const,
     size: '3.8 MB',
+    url: 'https://storage.supabase.co/materials/calculus-i-limits-derivatives.pdf',
     aiSummary: 'Introduction to differential calculus with practical examples',
     aiKeyPoints: [
       'Limit theorems and continuity',
@@ -300,6 +302,7 @@ export const mockStudyMaterials = [
     uploadedAt: '2025-10-20T10:30:00Z',
     type: 'PDF' as const,
     size: '4.0 MB',
+    url: 'https://storage.supabase.co/materials/classical-mechanics-fundamentals.pdf',
     aiSummary: 'Newtonian mechanics covering motion, forces, and energy',
     aiKeyPoints: [
       'Newton\'s laws of motion',
@@ -316,6 +319,7 @@ export const mockStudyMaterials = [
     uploadedAt: '2025-10-15T10:00:00Z',
     type: 'PDF' as const,
     size: '3.9 MB',
+    url: 'https://storage.supabase.co/materials/cell-structure-function.pdf',
     aiSummary: 'Comprehensive guide to cellular components and processes',
     aiKeyPoints: [
       'Organelle structure and function',
