@@ -330,10 +330,10 @@ export const mockStudyMaterials = [
 ];
 
 export const mockSubjects = [
-  { id: 's1', name: 'Computer Science', color: '#3b82f6' },
-  { id: 's2', name: 'Mathematics', color: '#10b981' },
-  { id: 's3', name: 'Physics', color: '#f59e0b' },
-  { id: 's4', name: 'Biology', color: '#ef4444' },
+  { id: 's1', name: 'Computer Science', color: '#3b82f6', icon: '💻', materialsCount: 12 },
+  { id: 's2', name: 'Mathematics', color: '#10b981', icon: '📐', materialsCount: 8 },
+  { id: 's3', name: 'Physics', color: '#f59e0b', icon: '⚛️', materialsCount: 5 },
+  { id: 's4', name: 'Biology', color: '#ef4444', icon: '🧬', materialsCount: 7 },
 ];
 
 export const mockPortfolios = {

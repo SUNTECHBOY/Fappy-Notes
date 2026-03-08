@@ -25,10 +25,11 @@ export function AllPortfoliosView({
   );
 
   const getOverallLevel = (portfolio: Portfolio) => {
-    if (portfolio.skills.filter((s) => s.level === 'Advanced').length >= 3) {
+    const safeSkills = portfolio?.skills || [];
+    if (safeSkills.filter((s) => s.level === 'Advanced').length >= 3) {
       return 'Advanced';
     }
-    if (portfolio.skills.filter((s) => s.level === 'Intermediate').length >= 3) {
+    if (safeSkills.filter((s) => s.level === 'Intermediate').length >= 3) {
       return 'Intermediate';
     }
     return 'Beginner';
@@ -107,7 +108,7 @@ export function AllPortfoliosView({
                 <p className="text-sm text-muted-foreground">Total Projects</p>
                 <p className="text-3xl font-bold mt-1">
                   {Object.values(portfolios).reduce(
-                    (sum, p) => sum + p.projects.length,
+                    (sum, p) => sum + (p?.projects?.length || 0),
                     0
                   )}
                 </p>
@@ -123,7 +124,7 @@ export function AllPortfoliosView({
                 <p className="text-sm text-muted-foreground">Total Skills</p>
                 <p className="text-3xl font-bold mt-1">
                   {Object.values(portfolios).reduce(
-                    (sum, p) => sum + p.skills.length,
+                    (sum, p) => sum + (p?.skills?.length || 0),
                     0
                   )}
                 </p>
@@ -141,9 +142,10 @@ export function AllPortfoliosView({
           if (!portfolio) return null;
 
           const level = getOverallLevel(portfolio);
-          const progressPercentage = Math.round(
-            (portfolio.skills.filter((s) => s.level !== 'Beginner').length /
-              portfolio.skills.length) *
+          const safeSkills = portfolio?.skills || [];
+          const progressPercentage = safeSkills.length === 0 ? 0 : Math.round(
+            (safeSkills.filter((s) => s.level !== 'Beginner').length /
+              safeSkills.length) *
               100
           );
 
@@ -156,26 +158,55 @@ export function AllPortfoliosView({
               <CardHeader>
                 <div className="flex items-start gap-3">
                   <div className="h-12 w-12 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-primary-foreground">
-                    {student.name
+                    {(student.name || 'User')
                       .split(' ')
                       .map((n) => n[0])
-                      .join('')}
+                      .join('')
+                      .substring(0, 2)
+                      .toUpperCase()}
                   </div>
                   <div className="flex-1">
-                    <CardTitle className="text-lg">{student.name}</CardTitle>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg leading-tight">{student.name}</CardTitle>
+                      <Badge variant={student.status === 'Active' ? 'default' : 'secondary'} className="text-[10px] px-1.5 py-0 h-4">
+                        {student.status}
+                      </Badge>
+                    </div>
                     <p className="text-sm text-muted-foreground">{student.email}</p>
+                    <div className="mt-2 space-y-1 text-xs text-muted-foreground bg-muted/50 p-2 rounded-md">
+                      <div className="flex justify-between">
+                        <span className="font-semibold text-foreground/70">Student ID:</span>
+                        <span className="font-mono">{student.id}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-semibold text-foreground/70">Role:</span>
+                        <span>{student.role}</span>
+                      </div>
+                      {student.mobileNumber && (
+                        <div className="flex justify-between">
+                          <span className="font-semibold text-foreground/70">Mobile:</span>
+                          <span>{student.mobileNumber}</span>
+                        </div>
+                      )}
+                      {student.joinedAt && (
+                        <div className="flex justify-between">
+                          <span className="font-semibold text-foreground/70">Joined:</span>
+                          <span>{new Date(student.joinedAt).toLocaleDateString()}</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Level Badge */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 mt-4">
                   <Badge className={getSkillLevelColor(level)}>{level} Level</Badge>
-                  <Badge variant="outline">{portfolio.skills.length} skills</Badge>
+                  <Badge variant="outline">{(portfolio?.skills || []).length} skills</Badge>
                 </div>
 
                 {/* Progress */}
-                <div className="space-y-2">
+                <div className="space-y-2 mt-4">
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">Skill Progress</span>
                     <span className="font-medium">{progressPercentage}%</span>
@@ -184,22 +215,22 @@ export function AllPortfoliosView({
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-3 gap-2 text-center pt-2 border-t">
+                <div className="grid grid-cols-3 gap-2 text-center pt-4 border-t mt-4">
                   <div>
-                    <p className="text-lg font-bold">{portfolio.projects.length}</p>
+                    <p className="text-xl font-bold">{(portfolio?.projects || []).length}</p>
                     <p className="text-xs text-muted-foreground">Projects</p>
                   </div>
                   <div>
-                    <p className="text-lg font-bold">{portfolio.achievements.length}</p>
+                    <p className="text-xl font-bold">{(portfolio?.achievements || []).length}</p>
                     <p className="text-xs text-muted-foreground">Awards</p>
                   </div>
                   <div>
-                    <p className="text-lg font-bold">{portfolio.timeline.length}</p>
+                    <p className="text-xl font-bold">{(portfolio?.timeline || []).length}</p>
                     <p className="text-xs text-muted-foreground">Milestones</p>
                   </div>
                 </div>
 
-                <Button className="w-full" variant="outline">
+                <Button className="w-full mt-4" variant="outline">
                   View Full Portfolio
                 </Button>
               </CardContent>

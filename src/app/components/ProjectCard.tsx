@@ -17,21 +17,21 @@ interface ProjectCardProps {
 export function ProjectCard({ project, students, onClick, isAdmin, onDelete }: ProjectCardProps) {
   const projectStudents = students.filter((s) => project.students.includes(s.id));
 
-  const statusColors = {
-    'Not Started': 'bg-gray-500',
-    'In Progress': 'bg-blue-500',
-    'Completed': 'bg-green-500',
+  const statusColors: Record<string, string> = {
+    'Not Started': 'bg-[var(--chart-2)] text-white hover:bg-[var(--chart-2)]/90', // Orange
+    'In Progress': 'bg-[var(--primary)] text-white hover:bg-[var(--primary)]/90', // Blue
+    'Completed': 'bg-[var(--chart-4)] text-white hover:bg-[var(--chart-4)]/90',   // Teal
   };
 
   return (
     <Card
-      className="cursor-pointer hover:shadow-lg transition-shadow"
+      className="cursor-pointer hover:shadow-md hover:-translate-y-1 transition-all duration-300 rounded-2xl border-none shadow-sm dark:bg-card dark:border"
       onClick={onClick}
     >
       <CardHeader>
         <div className="flex items-start justify-between">
           <CardTitle className="text-xl">{project.name}</CardTitle>
-          <Badge className={statusColors[project.status]}>
+          <Badge className={statusColors[project.status] || 'bg-gray-500'}>
             {project.status}
           </Badge>
         </div>

@@ -23,7 +23,7 @@ import { Mail, Phone, Shield, User } from 'lucide-react';
 interface InviteUserDialogProps {
   open: boolean;
   onClose: () => void;
-  onInvite: (invite: { email?: string; mobileNumber?: string; role: UserRole }) => void;
+  onInvite: (invite: { name?: string; email?: string; mobileNumber?: string; role: UserRole }) => void;
 }
 
 export function InviteUserDialog({
@@ -33,6 +33,7 @@ export function InviteUserDialog({
 }: InviteUserDialogProps) {
   const [inviteMethod, setInviteMethod] = useState<'email' | 'mobile'>('email');
   const [formData, setFormData] = useState({
+    name: '',
     email: '',
     mobileNumber: '',
     role: 'User' as UserRole,
@@ -40,11 +41,11 @@ export function InviteUserDialog({
 
   const handleSubmit = () => {
     if (inviteMethod === 'email' && formData.email) {
-      onInvite({ email: formData.email, role: formData.role });
-      setFormData({ email: '', mobileNumber: '', role: 'User' });
+      onInvite({ name: formData.name, email: formData.email, role: formData.role });
+      setFormData({ name: '', email: '', mobileNumber: '', role: 'User' });
     } else if (inviteMethod === 'mobile' && formData.mobileNumber) {
-      onInvite({ mobileNumber: formData.mobileNumber, role: formData.role });
-      setFormData({ email: '', mobileNumber: '', role: 'User' });
+      onInvite({ name: formData.name, mobileNumber: formData.mobileNumber, role: formData.role });
+      setFormData({ name: '', email: '', mobileNumber: '', role: 'User' });
     }
   };
 
@@ -62,6 +63,27 @@ export function InviteUserDialog({
           <p className="text-sm text-purple-900">
             Invite students and collaborators to join your StudentCollab project workspace. They will get access to shared projects, study materials, and collaborative features.
           </p>
+        </div>
+
+        <div className="space-y-4 mt-4">
+          <div className="space-y-2">
+            <Label>User's Full Name (Optional)</Label>
+            <div className="relative">
+              <User className="h-4 w-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Input
+                type="text"
+                placeholder="Name"
+                className="pl-9"
+                value={formData.name}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              If left blank, a name will be generated from their email.
+            </p>
+          </div>
         </div>
 
         <Tabs

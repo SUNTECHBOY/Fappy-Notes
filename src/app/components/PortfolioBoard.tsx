@@ -51,10 +51,10 @@ export function PortfolioBoard({
   const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
 
   const skillsByCategory = {
-    language: portfolio.skills.filter((s) => s.category === 'language'),
-    framework: portfolio.skills.filter((s) => s.category === 'framework'),
-    tool: portfolio.skills.filter((s) => s.category === 'tool'),
-    other: portfolio.skills.filter((s) => s.category === 'other'),
+    language: (portfolio?.skills || []).filter((s) => s.category === 'language'),
+    framework: (portfolio?.skills || []).filter((s) => s.category === 'framework'),
+    tool: (portfolio?.skills || []).filter((s) => s.category === 'tool'),
+    other: (portfolio?.skills || []).filter((s) => s.category === 'other'),
   };
 
   const getSkillLevelColor = (level: string) => {
@@ -70,10 +70,11 @@ export function PortfolioBoard({
     }
   };
 
+  const safeSkills = portfolio?.skills || [];
   const overallLevel =
-    portfolio.skills.filter((s) => s.level === 'Advanced').length >= 3
+    safeSkills.filter((s) => s.level === 'Advanced').length >= 3
       ? 'Advanced'
-      : portfolio.skills.filter((s) => s.level === 'Intermediate').length >= 3
+      : safeSkills.filter((s) => s.level === 'Intermediate').length >= 3
       ? 'Intermediate'
       : 'Beginner';
 
@@ -96,10 +97,10 @@ export function PortfolioBoard({
                 {overallLevel} Level
               </Badge>
               <Badge variant="outline">
-                {portfolio.skills.length} Skills
+                {(portfolio?.skills || []).length} Skills
               </Badge>
               <Badge variant="outline">
-                {portfolio.projects.length} Projects
+                {(portfolio?.projects || []).length} Projects
               </Badge>
             </div>
           </div>
@@ -245,12 +246,12 @@ export function PortfolioBoard({
         {/* Projects Tab */}
         <TabsContent value="projects" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {portfolio.projects.length === 0 ? (
+            {(portfolio?.projects || []).length === 0 ? (
               <div className="col-span-full text-center py-12 text-muted-foreground">
                 No projects yet
               </div>
             ) : (
-              portfolio.projects.map((project) => (
+              (portfolio?.projects || []).map((project) => (
                 <Card key={project.id}>
                   <CardHeader>
                     <CardTitle className="flex items-center justify-between">
@@ -302,7 +303,7 @@ export function PortfolioBoard({
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {portfolio.timeline
+                {(portfolio?.timeline || [])
                   .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
                   .map((entry, index) => (
                     <div key={entry.id} className="flex gap-4">
@@ -324,7 +325,7 @@ export function PortfolioBoard({
                             <Award className="h-5 w-5" />
                           )}
                         </div>
-                        {index < portfolio.timeline.length - 1 && (
+                        {index < (portfolio?.timeline || []).length - 1 && (
                           <div className="w-0.5 h-full bg-border mt-2" />
                         )}
                       </div>
@@ -347,12 +348,12 @@ export function PortfolioBoard({
         {/* Achievements Tab */}
         <TabsContent value="achievements" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {portfolio.achievements.length === 0 ? (
+            {(portfolio?.achievements || []).length === 0 ? (
               <div className="col-span-full text-center py-12 text-muted-foreground">
                 No achievements yet
               </div>
             ) : (
-              portfolio.achievements.map((achievement) => (
+              (portfolio?.achievements || []).map((achievement) => (
                 <Card key={achievement.id} className="border-2 border-amber-200 bg-amber-50/50">
                   <CardHeader>
                     <div className="flex items-start gap-3">
@@ -381,13 +382,13 @@ export function PortfolioBoard({
           </div>
 
           {/* Admin Feedback */}
-          {portfolio.adminFeedback.length > 0 && (
+          {(portfolio?.adminFeedback || []).length > 0 && (
             <Card>
               <CardHeader>
                 <CardTitle>Admin Feedback & Remarks</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                {portfolio.adminFeedback.map((feedback) => (
+                {(portfolio?.adminFeedback || []).map((feedback) => (
                   <div key={feedback.id} className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
                     <p className="text-sm">{feedback.text}</p>
                     <p className="text-xs text-muted-foreground mt-2">
@@ -450,33 +451,33 @@ export function PortfolioBoard({
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm">Skill Development Progress</span>
                   <span className="text-sm font-medium">
-                    {Math.round(
-                      (portfolio.skills.filter((s) => s.level !== 'Beginner').length /
-                        portfolio.skills.length) *
+                    {safeSkills.length === 0 ? 0 : Math.round(
+                      (safeSkills.filter((s) => s.level !== 'Beginner').length /
+                        safeSkills.length) *
                         100
                     )}
                     %
                   </span>
                 </div>
                 <Progress
-                  value={
-                    (portfolio.skills.filter((s) => s.level !== 'Beginner').length /
-                      portfolio.skills.length) *
+                  value={safeSkills.length === 0 ? 0 :
+                    (safeSkills.filter((s) => s.level !== 'Beginner').length /
+                      safeSkills.length) *
                     100
                   }
                 />
               </div>
               <div className="grid grid-cols-3 gap-4 pt-4">
                 <div className="text-center p-4 bg-muted rounded-lg">
-                  <p className="text-2xl font-bold">{portfolio.skills.length}</p>
+                  <p className="text-2xl font-bold">{safeSkills.length}</p>
                   <p className="text-sm text-muted-foreground">Total Skills</p>
                 </div>
                 <div className="text-center p-4 bg-muted rounded-lg">
-                  <p className="text-2xl font-bold">{portfolio.projects.length}</p>
+                  <p className="text-2xl font-bold">{(portfolio?.projects || []).length}</p>
                   <p className="text-sm text-muted-foreground">Projects</p>
                 </div>
                 <div className="text-center p-4 bg-muted rounded-lg">
-                  <p className="text-2xl font-bold">{portfolio.achievements.length}</p>
+                  <p className="text-2xl font-bold">{(portfolio?.achievements || []).length}</p>
                   <p className="text-sm text-muted-foreground">Achievements</p>
                 </div>
               </div>

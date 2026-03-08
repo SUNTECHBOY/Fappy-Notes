@@ -18,27 +18,28 @@ export const useDatabase = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Initial data fetch
+  // Initial data fetch (fast - projects, materials, students only)
   useEffect(() => {
     const fetchAllData = async () => {
       try {
         setLoading(true);
-        const [studentsData, projectsData, materialsData, portfoliosData] =
-          await Promise.all([
-            db.fetchStudents(),
-            db.fetchProjects(),
-            db.fetchStudyMaterials(),
-            db.fetchAllPortfolios(),
-          ]);
+        console.log('Starting data fetch...');
+        
+        const [studentsData, projectsData, materialsData] = await Promise.all([
+          db.fetchStudents().then(d => { console.log('Students loaded:', d); return d; }),
+          db.fetchProjects().then(d => { console.log('Projects loaded:', d); return d; }),
+          db.fetchStudyMaterials().then(d => { console.log('Materials loaded:', d); return d; }),
+        ]);
 
+        console.log('All data fetched successfully');
         setStudents(studentsData);
         setProjects(projectsData);
         setMaterials(materialsData);
-        setPortfolios(portfoliosData);
         setError(null);
       } catch (err) {
         console.error('Error fetching data:', err);
-        setError('Failed to load data from database');
+        const errorMsg = err instanceof Error ? err.message : String(err);
+        setError(`Failed to load data: ${errorMsg}`);
         toast.error('Failed to load data from database');
       } finally {
         setLoading(false);
@@ -48,38 +49,74 @@ export const useDatabase = () => {
     fetchAllData();
   }, []);
 
+  // Load portfolios separately in the background (non-blocking)
+  useEffect(() => {
+    const loadPortfolios = async () => {
+      try {
+        const portfoliosData = await db.fetchAllPortfolios();
+        setPortfolios(portfoliosData);
+      } catch (err) {
+        console.error('Error loading portfolios:', err);
+        // Don't show error toast for portfolios since main data loaded
+      }
+    };
+
+    loadPortfolios();
+  }, []);
+
   // Real-time subscriptions
   useEffect(() => {
-    const projectsSubscription = db.subscribeToProjects(async (payload) => {
-      console.log('Projects change:', payload);
-      // Refresh projects on any change
-      const updatedProjects = await db.fetchProjects();
-      setProjects(updatedProjects);
-    });
+    try {
+      const projectsSubscription = db.subscribeToProjects(async (payload) => {
+        try {
+          console.log('Projects change:', payload);
+          // Refresh projects on any change
+          const updatedProjects = await db.fetchProjects();
+          setProjects(updatedProjects);
+        } catch (err) {
+          console.error('Error refreshing projects:', err);
+        }
+      });
 
-    const tasksSubscription = db.subscribeToTasks(async (payload) => {
-      console.log('Tasks change:', payload);
-      // Refresh projects when tasks change
-      const updatedProjects = await db.fetchProjects();
-      setProjects(updatedProjects);
-    });
+      const tasksSubscription = db.subscribeToTasks(async (payload) => {
+        try {
+          console.log('Tasks change:', payload);
+          // Refresh projects when tasks change
+          const updatedProjects = await db.fetchProjects();
+          setProjects(updatedProjects);
+        } catch (err) {
+          console.error('Error refreshing projects on task change:', err);
+        }
+      });
 
-    const materialsSubscription = db.subscribeToStudyMaterials(async (payload) => {
-      console.log('Study materials change:', payload);
-      // Refresh materials
-      const updatedMaterials = await db.fetchStudyMaterials();
-      setMaterials(updatedMaterials);
-    });
+      const materialsSubscription = db.subscribeToStudyMaterials(async (payload) => {
+        try {
+          console.log('Study materials change:', payload);
+          // Refresh materials
+          const updatedMaterials = await db.fetchStudyMaterials();
+          setMaterials(updatedMaterials);
+        } catch (err) {
+          console.error('Error refreshing materials:', err);
+        }
+      });
 
-    return () => {
-      projectsSubscription.unsubscribe();
-      tasksSubscription.unsubscribe();
-      materialsSubscription.unsubscribe();
-    };
+      return () => {
+        try {
+          projectsSubscription.unsubscribe();
+          tasksSubscription.unsubscribe();
+          materialsSubscription.unsubscribe();
+        } catch (err) {
+          console.error('Error unsubscribing:', err);
+        }
+      };
+    } catch (err) {
+      console.error('Error setting up subscriptions:', err);
+      return () => {};
+    }
   }, []);
 
   // Student operations
-  const createStudent = async (studentData: Omit<Student, 'id'>) => {
+  const createStudent = async (studentData: Omit<Student, 'id'> & { id?: string }) => {
     try {
       const newStudent = await db.createStudent(studentData);
       setStudents([...students, newStudent]);

@@ -64,6 +64,7 @@ interface AdminManagementProps {
   studyGroups: StudyGroup[];
   projects: Array<{ id: string; name: string }>;
   onInviteUser: (invite: {
+    name?: string;
     email?: string;
     mobileNumber?: string;
     role: UserRole;

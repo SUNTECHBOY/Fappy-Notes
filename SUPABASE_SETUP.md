@@ -43,7 +43,25 @@ After running the schema, verify that all tables were created:
    - `study_group_members`
    - `activity_logs`
 
-### 3. Migrate Existing Data
+### 3. Create Storage Bucket for Profile Photos
+
+Before users can upload profile photos, you need to create a storage bucket:
+
+1. Go to **Storage** in the left sidebar of your Supabase Dashboard
+2. Click **Create a new bucket**
+3. Name it: `student-photos`
+4. Make it **Public** (toggle on)
+5. Click **Create bucket**
+6. Go to the **Policies** tab on the bucket
+7. Click **New policy** and add this policy:
+   - **Policy name:** `Allow authenticated users to upload photos`
+   - **CRUD operations:** Select all (INSERT, SELECT, UPDATE, DELETE)
+   - **Roles:** authenticated
+   - **Click "Review"** then **"Save policy"**
+
+This allows authenticated users to upload and manage their profile photos.
+
+### 4. Migrate Existing Data
 
 The application includes a built-in data migration tool:
 

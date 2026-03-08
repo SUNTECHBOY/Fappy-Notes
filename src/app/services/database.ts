@@ -20,10 +20,11 @@ export const fetchStudents = async () => {
   return data as Student[];
 };
 
-export const createStudent = async (student: Omit<Student, 'id'>) => {
+export const createStudent = async (student: Omit<Student, 'id'> & { id?: string }) => {
+  const insertData = student.id ? student : { id: `u${Date.now()}`, ...student };
   const { data, error } = await supabase
     .from('students')
-    .insert([{ id: `u${Date.now()}`, ...student }])
+    .insert([insertData])
     .select()
     .single();
   if (error) throw error;
@@ -41,9 +42,66 @@ export const updateStudent = async (id: string, updates: Partial<Student>) => {
   return data as Student;
 };
 
+export const completeOnboarding = async (id: string, updates: Partial<Student>) => {
+  const { data, error } = await supabase
+    .from('students')
+    .update({ ...updates, status: 'Active', updated_at: new Date().toISOString() })
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data as Student;
+};
+
 export const deleteStudent = async (id: string) => {
   const { error } = await supabase.from('students').delete().eq('id', id);
   if (error) throw error;
+};
+
+// Upload student profile photo
+export const uploadProfilePhoto = async (studentId: string, file: File): Promise<string> => {
+  try {
+    const fileName = `${studentId}-${Date.now()}-${file.name}`;
+    console.log('📸 Starting upload:', { studentId, fileName, fileSize: file.size, fileType: file.type });
+    
+    // Check if file is valid
+    if (!file.size) {
+      throw new Error('File is empty');
+    }
+    
+    const { data, error } = await supabase.storage
+      .from('student-photos')
+      .upload(`profiles/${fileName}`, file, {
+        cacheControl: '3600',
+        upsert: true,
+      });
+
+    if (error) {
+      console.error('❌ Supabase Storage Error:', {
+        message: error.message,
+        status: (error as any).status,
+        statusCode: (error as any).statusCode,
+      });
+      throw new Error(`Upload failed: ${error.message}`);
+    }
+
+    console.log('✅ Upload successful:', data);
+
+    // Get public URL
+    const { data: publicUrl } = supabase.storage
+      .from('student-photos')
+      .getPublicUrl(`profiles/${fileName}`);
+
+    console.log('🔗 Public URL:', publicUrl.publicUrl);
+    return publicUrl.publicUrl;
+  } catch (err) {
+    console.error('❌ Full error details:', {
+      error: err,
+      message: err instanceof Error ? err.message : String(err),
+      stack: err instanceof Error ? err.stack : 'N/A',
+    });
+    throw err;
+  }
 };
 
 // Projects
@@ -252,8 +310,7 @@ export const fetchPortfolio = async (userId: string): Promise<Portfolio> => {
       supabase
         .from('portfolio_settings')
         .select('*')
-        .eq('user_id', userId)
-        .single(),
+        .eq('user_id', userId),
     ]);
 
   if (skills.error) throw skills.error;
@@ -261,6 +318,10 @@ export const fetchPortfolio = async (userId: string): Promise<Portfolio> => {
   if (timeline.error) throw timeline.error;
   if (achievements.error) throw achievements.error;
   if (feedback.error) throw feedback.error;
+  if (settings.error) throw settings.error;
+
+  // Get the first settings row if it exists
+  const settingsData = settings.data?.[0];
 
   return {
     userId,
@@ -270,13 +331,13 @@ export const fetchPortfolio = async (userId: string): Promise<Portfolio> => {
     achievements: achievements.data as Achievement[],
     adminFeedback: feedback.data as AdminFeedback[],
     workSamples: {
-      github: settings.data?.work_samples_github,
-      portfolio: settings.data?.work_samples_portfolio,
-      demo: settings.data?.work_samples_demo,
+      github: settingsData?.work_samples_github,
+      portfolio: settingsData?.work_samples_portfolio,
+      demo: settingsData?.work_samples_demo,
     },
-    aiSkillGapAnalysis: settings.data?.ai_skill_gap_analysis,
-    aiRecommendations: settings.data?.ai_recommendations,
-    aiSummary: settings.data?.ai_summary,
+    aiSkillGapAnalysis: settingsData?.ai_skill_gap_analysis,
+    aiRecommendations: settingsData?.ai_recommendations,
+    aiSummary: settingsData?.ai_summary,
   };
 };
 
