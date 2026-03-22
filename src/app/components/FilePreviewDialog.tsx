@@ -77,17 +77,29 @@ export function FilePreviewDialog({
             )}
 
             {material.type === 'pdf' && (
-              <div className="w-full h-[500px] border rounded-lg bg-muted flex items-center justify-center">
-                <div className="text-center space-y-4">
-                  <p className="text-muted-foreground">PDF Preview</p>
-                  <Button asChild>
-                    <a href={material.url} target="_blank" rel="noopener noreferrer">
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      Open in New Tab
-                    </a>
-                  </Button>
+              material.url && material.url !== 'pending-upload' ? (
+                <div className="w-full h-[600px] border rounded-lg overflow-hidden">
+                  <iframe
+                    src={material.url}
+                    title={material.name}
+                    className="w-full h-full"
+                    style={{ border: 'none' }}
+                  />
                 </div>
-              </div>
+              ) : (
+                <div className="w-full h-[300px] border rounded-lg bg-muted flex items-center justify-center">
+                  <div className="text-center space-y-3 px-6">
+                    <p className="text-muted-foreground font-medium">PDF not available</p>
+                    <p className="text-sm text-muted-foreground">
+                      This file was uploaded before the <code>study-materials</code> storage bucket was created in Supabase.
+                      Please re-upload the file after setting up the bucket.
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Go to Supabase Dashboard → Storage → Create bucket named <strong>study-materials</strong> (set to Public), then re-upload.
+                    </p>
+                  </div>
+                </div>
+              )
             )}
 
             {(material.type === 'youtube' || material.type === 'link') && (

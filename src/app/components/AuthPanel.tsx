@@ -21,16 +21,14 @@ export function AuthPanel({ loading, error, onSignIn, onSignUp }: AuthPanelProps
   const [rememberMe, setRememberMe] = useState(false);
 
   useEffect(() => {
-    // Load saved credentials if they exist
+    // Only load saved email — never save/restore passwords
     const savedEmail = localStorage.getItem('sc_saved_email');
-    const savedPassword = localStorage.getItem('sc_saved_password');
     if (savedEmail) {
       setEmail(savedEmail);
       setRememberMe(true);
     }
-    if (savedPassword) {
-      setPassword(savedPassword);
-    }
+    // Clear any previously stored password (migrate old insecure data)
+    localStorage.removeItem('sc_saved_password');
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -40,11 +38,10 @@ export function AuthPanel({ loading, error, onSignIn, onSignUp }: AuthPanelProps
       
       if (rememberMe) {
         localStorage.setItem('sc_saved_email', email);
-        localStorage.setItem('sc_saved_password', password);
       } else {
         localStorage.removeItem('sc_saved_email');
-        localStorage.removeItem('sc_saved_password');
       }
+      // Never store the password in localStorage
 
       await onSignIn({ email, password });
     } else {
@@ -190,10 +187,6 @@ export function AuthPanel({ loading, error, onSignIn, onSignUp }: AuthPanelProps
                     />
                   </div>
                 </div>
-
-                <p className="text-xs text-muted-foreground text-center">
-                  After signing up, check your email to confirm your account.
-                </p>
 
                 {error && (
                   <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm flex items-center animate-in fade-in duration-300">

@@ -34,15 +34,24 @@ export const useAuth = (): UseAuthResult => {
     const initAuth = async () => {
       try {
         setAuthLoading(true);
+
+        // Timeout after 5 seconds so we never hang on "Loading session..."
+        const timeoutPromise = new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('Auth check timed out')), 5000)
+        );
+
+        const authPromise = supabase.auth.getUser();
+
         const {
           data: { user },
           error,
-        } = await supabase.auth.getUser();
+        } = await Promise.race([authPromise, timeoutPromise]);
 
         if (error) {
           console.error('Error loading auth user:', error);
           if (isMounted) {
-            setAuthError(error.message);
+            // Don't block — just clear the error and let the user sign in
+            setAuthError(null);
           }
         } else {
           if (isMounted) {
@@ -52,9 +61,10 @@ export const useAuth = (): UseAuthResult => {
         }
       } catch (err) {
         console.error('Unexpected auth init error:', err);
+        // Don't block the page on errors — just show the sign-in screen
         if (isMounted) {
-          const msg = err instanceof Error ? err.message : String(err);
-          setAuthError(msg);
+          setUser(null);
+          setAuthError(null);
         }
       } finally {
         if (isMounted) {
@@ -119,12 +129,20 @@ export const useAuth = (): UseAuthResult => {
         } catch (dbErr) {
           console.error('Failed to create initial student profile:', dbErr);
         }
-        setUser(data.user as AuthUser);
-      }
 
-      toast.success(
-        'Sign up successful. Please check your email to confirm your account before logging in.'
-      );
+        // If email confirmation is disabled in Supabase, the user is already
+        // confirmed and we can sign them in immediately.
+        if (data.session) {
+          // Session returned = email confirmation is OFF → user is logged in
+          setUser(data.user as AuthUser);
+          toast.success('Account created successfully! Welcome aboard 🎉');
+        } else {
+          // Session is null = email confirmation is still ON
+          toast.success(
+            'Account created! Please disable "Confirm email" in Supabase Auth settings, then sign in.'
+          );
+        }
+      }
     } catch (err) {
       console.error('Unexpected sign up error:', err);
       const msg = err instanceof Error ? err.message : String(err);
@@ -147,8 +165,12 @@ export const useAuth = (): UseAuthResult => {
 
       if (error) {
         console.error('Sign in error:', error);
-        setAuthError(error.message);
-        toast.error(error.message);
+        // Provide a more helpful message for unconfirmed email accounts
+        const msg = error.message.toLowerCase().includes('email not confirmed')
+          ? 'Your email is not confirmed. Go to Supabase Dashboard → Authentication → Providers → Email → turn OFF "Confirm email" → Save, then try again.'
+          : error.message;
+        setAuthError(msg);
+        toast.error(msg, { duration: 8000 });
         return;
       }
 

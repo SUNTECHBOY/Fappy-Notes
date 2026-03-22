@@ -31,6 +31,8 @@ import {
   Shield,
   Moon,
   Sun,
+  User,
+  LogOut,
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs';
 import { Sheet, SheetContent, SheetTrigger } from './components/ui/sheet';
@@ -118,15 +120,27 @@ export default function App() {
   // Derived State
   const selectedProject = selectedProjectId ? projects.find((p) => p.id === selectedProjectId) || null : null;
 
-  // Authentication Effect
+  // Declare currentStudent early so the role-sync effect can use it
+  const currentStudent = students.find((s) => s.id === currentUserId);
+
+  // Authentication Effect — set userId from auth session
   useEffect(() => {
     if (user) {
       setCurrentUserId(user.id);
+      // Role will be synced from DB student record below
+      // Fall back to auth metadata only if student not loaded yet
       setUserRole((user.user_metadata?.role as UserRole) || 'User');
     } else {
       setCurrentUserId(null);
     }
   }, [user]);
+
+  // Sync role from DB student record (authoritative source)
+  useEffect(() => {
+    if (currentStudent?.role) {
+      setUserRole(currentStudent.role as UserRole);
+    }
+  }, [currentStudent]);
 
   // Filter projects
   const filteredProjects = projects.filter((project) => {
@@ -145,8 +159,6 @@ export default function App() {
     completed: projects.filter((p) => p.status === 'Completed').length,
     totalTasks: projects.reduce((sum, p) => sum + p.tasks.length, 0),
   };
-
-  const currentStudent = students.find((s) => s.id === currentUserId);
 
   // Project handlers
   const handleCreateProject = async (newProjectData: {
@@ -224,20 +236,18 @@ export default function App() {
 
   const handleUploadMaterial = async (material: Omit<StudyMaterial, 'id' | 'uploadedAt'>) => {
     if (!currentUserId) return;
-    try {
-      await uploadMaterial({
-        ...material,
-        uploadedBy: currentUserId,
-        aiSummary: 'Comprehensive study material covering key concepts with detailed examples.',
-        aiKeyPoints: [
-          'Well-structured content with clear explanations',
-          'Includes practical examples and use cases',
-          'Suitable for intermediate to advanced learners',
-        ],
-      });
-    } catch (err) {
-      console.error('Error uploading material:', err);
-    }
+    await uploadMaterial({
+      ...material,
+      uploadedBy: currentUserId,
+      aiSummary: 'Comprehensive study material covering key concepts with detailed examples.',
+      aiKeyPoints: [
+        'Well-structured content with clear explanations',
+        'Includes practical examples and use cases',
+        'Suitable for intermediate to advanced learners',
+      ],
+    });
+    // Note: errors are NOT caught here — they propagate back to FileUploadDialog
+    // so the dialog can display them inline instead of silently failing.
   };
 
   const handleDeleteMaterial = async (materialId: string) => {
@@ -381,10 +391,29 @@ export default function App() {
     </nav>
   );
 
+  const [loadingSlow, setLoadingSlow] = useState(false);
+  useEffect(() => {
+    if (!authLoading) { setLoadingSlow(false); return; }
+    const t = setTimeout(() => setLoadingSlow(true), 4000);
+    return () => clearTimeout(t);
+  }, [authLoading]);
+
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-950">
-        <div className="text-sky-400 animate-pulse font-medium text-lg">Loading session...</div>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-950 gap-4">
+        <div className="h-10 w-10 rounded-full border-4 border-sky-500 border-t-transparent animate-spin" />
+        <div className="text-sky-400 font-medium text-lg">Loading session...</div>
+        {loadingSlow && (
+          <div className="text-center mt-2">
+            <p className="text-slate-400 text-sm mb-3">Taking longer than expected...</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-sm font-medium transition-colors"
+            >
+              Reload Page
+            </button>
+          </div>
+        )}
       </div>
     );
   }
@@ -484,21 +513,17 @@ export default function App() {
                   <span className="sr-only">Toggle theme</span>
                 </Button>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground hidden md:inline">
-                    Role:
-                  </span>
-                  <Select
-                    value={userRole}
-                    onValueChange={(v) => setUserRole(v as UserRole)}
-                  >
-                    <SelectTrigger className="w-[100px] md:w-[120px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Admin">Admin</SelectItem>
-                      <SelectItem value="User">User</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  {userRole === 'Admin' ? (
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-indigo-500/15 to-purple-500/15 border border-indigo-300/40 dark:border-indigo-500/30">
+                      <Shield className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
+                      <span className="text-sm font-semibold text-indigo-700 dark:text-indigo-300">Admin</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted border border-border">
+                      <User className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span className="text-sm font-medium text-muted-foreground">User</span>
+                    </div>
+                  )}
                 </div>
                 <div
                   className="hidden md:flex items-center gap-2 cursor-pointer hover:bg-accent rounded-lg p-2 transition-colors"
@@ -528,6 +553,15 @@ export default function App() {
                     </div>
                   </div>
                 </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={signOut}
+                  title="Sign Out"
+                  className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                >
+                  <LogOut className="h-5 w-5" />
+                </Button>
               </div>
             </div>
           </div>
@@ -556,75 +590,64 @@ export default function App() {
                 {/* Projects Section */}
                 {activeSection === 'projects' && (
               <>
-                {/* Stats Dashboard */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-8">
-                  <div className="bg-card rounded-2xl p-4 md:p-6 shadow-sm border-none relative overflow-hidden group hover:shadow-md hover:shadow-[var(--glow-sky)] transition-all duration-300 dark:border">
-                    <div className="absolute inset-0 bg-gradient-to-br from-[var(--glow-sky)] to-transparent opacity-0 group-hover:opacity-20 transition-opacity" />
-                    <div className="flex items-center justify-between relative z-10">
-                      <div>
-                        <p className="text-xs md:text-sm text-[var(--accent-sky)] font-medium">
-                          Total Projects
-                        </p>
-                        <p className="text-2xl md:text-3xl font-bold mt-1">
-                          {stats.totalProjects}
-                        </p>
+                {/* Stats Dashboard — Premium Bento Grid */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5 mb-8">
+                  {/* Total Projects */}
+                  <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500/10 via-indigo-500/8 to-blue-600/5 dark:from-blue-500/20 dark:via-indigo-500/15 dark:to-blue-600/10 border border-blue-200/60 dark:border-blue-500/20 p-4 md:p-6 group hover:shadow-lg hover:shadow-blue-500/15 hover:-translate-y-0.5 transition-all duration-300">
+                    <div className="absolute -top-6 -right-6 w-24 h-24 bg-blue-400/20 dark:bg-blue-400/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500" />
+                    <div className="relative z-10 flex flex-col gap-3">
+                      <div className="flex items-center justify-between">
+                        <div className="p-2.5 rounded-xl bg-blue-500/15 dark:bg-blue-400/20 border border-blue-300/30">
+                          <LayoutDashboard className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <span className="text-3xl md:text-4xl font-black text-blue-700 dark:text-blue-300 tabular-nums">{stats.totalProjects}</span>
                       </div>
-                      <div className="p-2 rounded-2xl bg-gradient-to-br from-blue-500/20 to-[var(--accent-sky)]/20">
-                        <LayoutDashboard className="h-8 md:h-10 w-8 md:w-10 text-[var(--accent-sky)]" />
-                      </div>
+                      <p className="text-xs md:text-sm font-semibold text-blue-600/80 dark:text-blue-400/80 uppercase tracking-wide">Total Projects</p>
                     </div>
                   </div>
-                  <div className="bg-card rounded-2xl p-4 md:p-6 shadow-sm border-none relative overflow-hidden group hover:shadow-md hover:shadow-[var(--glow-peach)] transition-all duration-300 dark:border">
-                    <div className="absolute inset-0 bg-gradient-to-br from-[var(--glow-peach)] to-transparent opacity-0 group-hover:opacity-20 transition-opacity" />
-                    <div className="flex items-center justify-between relative z-10">
-                      <div>
-                        <p className="text-xs md:text-sm text-[var(--accent-peach)] font-medium">
-                          In Progress
-                        </p>
-                        <p className="text-2xl md:text-3xl font-bold mt-1">
-                          {stats.inProgress}
-                        </p>
+                  {/* In Progress */}
+                  <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-500/10 via-orange-500/8 to-amber-600/5 dark:from-amber-500/20 dark:via-orange-500/15 dark:to-amber-600/10 border border-amber-200/60 dark:border-amber-500/20 p-4 md:p-6 group hover:shadow-lg hover:shadow-amber-500/15 hover:-translate-y-0.5 transition-all duration-300">
+                    <div className="absolute -top-6 -right-6 w-24 h-24 bg-amber-400/20 dark:bg-amber-400/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500" />
+                    <div className="relative z-10 flex flex-col gap-3">
+                      <div className="flex items-center justify-between">
+                        <div className="p-2.5 rounded-xl bg-amber-500/15 dark:bg-amber-400/20 border border-amber-300/30">
+                          <FolderKanban className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                        </div>
+                        <span className="text-3xl md:text-4xl font-black text-amber-700 dark:text-amber-300 tabular-nums">{stats.inProgress}</span>
                       </div>
-                      <div className="p-2 rounded-2xl bg-gradient-to-br from-amber-500/20 to-[var(--accent-peach)]/20">
-                        <FolderKanban className="h-8 md:h-10 w-8 md:w-10 text-[var(--accent-peach)]" />
-                      </div>
+                      <p className="text-xs md:text-sm font-semibold text-amber-600/80 dark:text-amber-400/80 uppercase tracking-wide">In Progress</p>
                     </div>
                   </div>
-                  <div className="bg-card rounded-2xl p-4 md:p-6 shadow-sm border-none relative overflow-hidden group hover:shadow-md hover:shadow-[var(--glow-mint)] transition-all duration-300 dark:border">
-                    <div className="absolute inset-0 bg-gradient-to-br from-[var(--glow-mint)] to-transparent opacity-0 group-hover:opacity-20 transition-opacity" />
-                    <div className="flex items-center justify-between relative z-10">
-                      <div>
-                        <p className="text-xs md:text-sm text-[var(--accent-mint)] font-medium">
-                          Completed
-                        </p>
-                        <p className="text-2xl md:text-3xl font-bold mt-1">
-                          {stats.completed}
-                        </p>
+                  {/* Completed */}
+                  <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500/10 via-teal-500/8 to-emerald-600/5 dark:from-emerald-500/20 dark:via-teal-500/15 dark:to-emerald-600/10 border border-emerald-200/60 dark:border-emerald-500/20 p-4 md:p-6 group hover:shadow-lg hover:shadow-emerald-500/15 hover:-translate-y-0.5 transition-all duration-300">
+                    <div className="absolute -top-6 -right-6 w-24 h-24 bg-emerald-400/20 dark:bg-emerald-400/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500" />
+                    <div className="relative z-10 flex flex-col gap-3">
+                      <div className="flex items-center justify-between">
+                        <div className="p-2.5 rounded-xl bg-emerald-500/15 dark:bg-emerald-400/20 border border-emerald-300/30">
+                          <Settings className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                        </div>
+                        <span className="text-3xl md:text-4xl font-black text-emerald-700 dark:text-emerald-300 tabular-nums">{stats.completed}</span>
                       </div>
-                      <div className="p-2 rounded-2xl bg-gradient-to-br from-green-500/20 to-[var(--accent-mint)]/20">
-                        <Settings className="h-8 md:h-10 w-8 md:w-10 text-[var(--accent-mint)]" />
-                      </div>
+                      <p className="text-xs md:text-sm font-semibold text-emerald-600/80 dark:text-emerald-400/80 uppercase tracking-wide">Completed</p>
                     </div>
                   </div>
-                  <div className="bg-card rounded-2xl p-4 md:p-6 shadow-sm border-none relative overflow-hidden group hover:shadow-md hover:shadow-[var(--glow-lavender)] transition-all duration-300 dark:border">
-                    <div className="absolute inset-0 bg-gradient-to-br from-[var(--glow-lavender)] to-transparent opacity-0 group-hover:opacity-20 transition-opacity" />
-                    <div className="flex items-center justify-between relative z-10">
-                      <div>
-                        <p className="text-xs md:text-sm text-[var(--accent-lavender)] font-medium">
-                          Total Tasks
-                        </p>
-                        <p className="text-2xl md:text-3xl font-bold mt-1">
-                          {stats.totalTasks}
-                        </p>
+                  {/* Total Tasks */}
+                  <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-500/10 via-violet-500/8 to-purple-600/5 dark:from-purple-500/20 dark:via-violet-500/15 dark:to-purple-600/10 border border-purple-200/60 dark:border-purple-500/20 p-4 md:p-6 group hover:shadow-lg hover:shadow-purple-500/15 hover:-translate-y-0.5 transition-all duration-300">
+                    <div className="absolute -top-6 -right-6 w-24 h-24 bg-purple-400/20 dark:bg-purple-400/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500" />
+                    <div className="relative z-10 flex flex-col gap-3">
+                      <div className="flex items-center justify-between">
+                        <div className="p-2.5 rounded-xl bg-purple-500/15 dark:bg-purple-400/20 border border-purple-300/30">
+                          <Users className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                        </div>
+                        <span className="text-3xl md:text-4xl font-black text-purple-700 dark:text-purple-300 tabular-nums">{stats.totalTasks}</span>
                       </div>
-                      <div className="p-2 rounded-2xl bg-gradient-to-br from-purple-500/20 to-[var(--accent-lavender)]/20">
-                        <Users className="h-8 md:h-10 w-8 md:w-10 text-[var(--accent-lavender)]" />
-                      </div>
+                      <p className="text-xs md:text-sm font-semibold text-purple-600/80 dark:text-purple-400/80 uppercase tracking-wide">Total Tasks</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Main Content */}
+
                 <Tabs defaultValue="board" className="space-y-6">
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <TabsList className="bg-white/50 border border-border/50 rounded-xl p-1 shadow-sm dark:bg-card">
@@ -800,7 +823,7 @@ export default function App() {
               <StudyMaterialsBoard
                 materials={materials}
                 subjects={subjects}
-                students={mockStudents}
+                students={students.length > 0 ? students : mockStudents}
                 currentUserId={currentUserId}
                 userRole={userRole}
                 onUploadMaterial={handleUploadMaterial}
@@ -810,12 +833,21 @@ export default function App() {
             )}
 
             {/* Portfolio Section */}
-            {activeSection === 'portfolio' && portfolios[currentUserId] && (
+            {activeSection === 'portfolio' && (
               <PortfolioBoard
-                portfolio={portfolios[currentUserId]}
+                portfolio={portfolios[currentUserId] || {
+                  userId: currentUserId,
+                  skills: [],
+                  projects: [],
+                  timeline: [],
+                  achievements: [],
+                  adminFeedback: [],
+                  workSamples: {},
+                }}
                 student={currentStudent || { id: currentUserId, name: user?.user_metadata?.full_name || 'User', email: user?.email || '', status: 'Active', avatar: '', bio: '' } as any}
                 userRole={userRole}
                 currentUserId={currentUserId}
+                allProjects={projects}
                 completedProjects={projects.filter(p => p.status === 'Completed' && p.students.includes(currentUserId)).length}
                 materialsUploaded={materials.filter(m => m.uploadedBy === currentUserId).length}
                 onAddAchievement={(achievement) =>
@@ -840,10 +872,12 @@ export default function App() {
                     <PortfolioBoard
                       portfolio={portfolios[selectedPortfolioUserId]}
                       student={
+                        students.find((s) => s.id === selectedPortfolioUserId) ||
                         mockStudents.find((s) => s.id === selectedPortfolioUserId)!
                       }
                       userRole={userRole}
                       currentUserId={currentUserId}
+                      allProjects={projects}
                       completedProjects={projects.filter(p => p.status === 'Completed' && p.students.includes(selectedPortfolioUserId)).length}
                       materialsUploaded={materials.filter(m => m.uploadedBy === selectedPortfolioUserId).length}
                       onAddAchievement={(achievement) =>
@@ -857,8 +891,9 @@ export default function App() {
                 ) : (
                   <AllPortfoliosView
                     portfolios={portfolios}
-                    students={mockStudents}
+                    students={students.length > 0 ? students : mockStudents}
                     onSelectStudent={setSelectedPortfolioUserId}
+                    onAddFeedback={(userId, feedback) => handleAddFeedback(userId, feedback)}
                   />
                 )}
               </>
@@ -929,11 +964,19 @@ export default function App() {
       </div>
 
       {/* Profile Edit Dialog */}
-      {currentStudent && (
+      {(currentStudent || currentUserId) && (
         <ProfileEditDialog
           open={isProfileEditOpen}
           onOpenChange={setIsProfileEditOpen}
-          student={currentStudent}
+          student={currentStudent || { 
+            id: currentUserId, 
+            name: user?.user_metadata?.full_name || 'User', 
+            email: user?.email || '', 
+            status: 'Active', 
+            avatar: '', 
+            bio: '',
+            role: userRole
+          } as any}
           onSave={handleUpdateProfile}
         />
       )}

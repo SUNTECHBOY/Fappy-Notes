@@ -13,44 +13,98 @@ import type {
   AdminFeedback,
 } from '../types';
 
+// ── Student field mappers (camelCase JS ↔ snake_case DB) ─────────────────────
+const toDbStudent = (s: Partial<Student>): Record<string, any> => {
+  const map: Record<string, any> = {};
+  if (s.id !== undefined)               map.id               = s.id;
+  if (s.name !== undefined)             map.name             = s.name;
+  if (s.avatar !== undefined)           map.avatar           = s.avatar;
+  if (s.email !== undefined)            map.email            = s.email;
+  if (s.role !== undefined)             map.role             = s.role;
+  if (s.status !== undefined)          map.status           = s.status;
+  if (s.mobileNumber !== undefined)    map.mobile_number    = s.mobileNumber;
+  if (s.joinedAt !== undefined)         map.joined_at        = s.joinedAt;
+  if (s.lastActive !== undefined)       map.last_active      = s.lastActive;
+  if (s.emailVerified !== undefined)   map.email_verified   = s.emailVerified;
+  if (s.bio !== undefined)              map.bio              = s.bio;
+  if (s.githubId !== undefined)         map.github_id        = s.githubId;
+  if (s.portfolioUrl !== undefined)     map.portfolio_url    = s.portfolioUrl;
+  if (s.linkedinUrl !== undefined)      map.linkedin_url     = s.linkedinUrl;
+  if (s.websiteUrl !== undefined)       map.website_url      = s.websiteUrl;
+  if (s.twitterHandle !== undefined)   map.twitter_handle   = s.twitterHandle;
+  if (s.location !== undefined)         map.location         = s.location;
+  if (s.occupation !== undefined)       map.occupation       = s.occupation;
+  return map;
+};
+
+const fromDbStudent = (row: any): Student => ({
+  id:                   row.id,
+  name:                 row.name,
+  avatar:               row.avatar ?? '',
+  email:                row.email,
+  role:                 row.role,
+  status:               row.status,
+  mobileNumber:         row.mobile_number,
+  joinedAt:             row.joined_at,
+  lastActive:           row.last_active,
+  emailVerified:        row.email_verified,
+  bio:                  row.bio,
+  githubId:             row.github_id,
+  portfolioUrl:         row.portfolio_url,
+  linkedinUrl:          row.linkedin_url,
+  websiteUrl:           row.website_url,
+  twitterHandle:        row.twitter_handle,
+  location:             row.location,
+  occupation:           row.occupation,
+  assignedProjects:     row.assigned_projects,
+  assignedStudyGroups:  row.assigned_study_groups,
+});
+
 // Students/Users
 export const fetchStudents = async () => {
   const { data, error } = await supabase.from('students').select('*').order('name');
   if (error) throw error;
-  return data as Student[];
+  return (data as any[]).map(fromDbStudent);
 };
 
 export const createStudent = async (student: Omit<Student, 'id'> & { id?: string }) => {
-  const insertData = student.id ? student : { id: `u${Date.now()}`, ...student };
+  const dbData = toDbStudent(student as Student);
+  if (!dbData.id) dbData.id = `u${Date.now()}`;
   const { data, error } = await supabase
     .from('students')
-    .insert([insertData])
+    .insert([dbData])
     .select()
     .single();
   if (error) throw error;
-  return data as Student;
+  return fromDbStudent(data);
 };
 
 export const updateStudent = async (id: string, updates: Partial<Student>) => {
+  const dbUpdates = { ...toDbStudent(updates), updated_at: new Date().toISOString() };
   const { data, error } = await supabase
     .from('students')
-    .update({ ...updates, updated_at: new Date().toISOString() })
+    .update(dbUpdates)
     .eq('id', id)
     .select()
     .single();
   if (error) throw error;
-  return data as Student;
+  return fromDbStudent(data);
 };
 
 export const completeOnboarding = async (id: string, updates: Partial<Student>) => {
+  const dbUpdates = {
+    ...toDbStudent(updates),
+    status: 'Active',
+    updated_at: new Date().toISOString(),
+  };
   const { data, error } = await supabase
     .from('students')
-    .update({ ...updates, status: 'Active', updated_at: new Date().toISOString() })
+    .update(dbUpdates)
     .eq('id', id)
     .select()
     .single();
   if (error) throw error;
-  return data as Student;
+  return fromDbStudent(data);
 };
 
 export const deleteStudent = async (id: string) => {
@@ -242,6 +296,33 @@ export const createComment = async (
   return data as Comment;
 };
 
+// ── StudyMaterial field mappers ───────────────────────────────────────────────
+const toDbMaterial = (m: Omit<StudyMaterial, 'id' | 'uploadedAt'>): Record<string, any> => ({
+  name:           m.name,
+  type:           m.type,
+  subject:        m.subject,
+  uploaded_by:    m.uploadedBy,
+  url:            m.url,
+  thumbnail:      m.thumbnail,
+  size:           m.size,
+  ai_summary:     m.aiSummary,
+  ai_key_points:  m.aiKeyPoints,
+});
+
+const fromDbMaterial = (row: any): StudyMaterial => ({
+  id:           row.id,
+  name:         row.name,
+  type:         row.type,
+  subject:      row.subject,
+  uploadedBy:   row.uploaded_by,
+  uploadedAt:   row.uploaded_at,
+  url:          row.url,
+  thumbnail:    row.thumbnail,
+  size:         row.size,
+  aiSummary:    row.ai_summary,
+  aiKeyPoints:  row.ai_key_points,
+});
+
 // Study Materials
 export const fetchStudyMaterials = async () => {
   const { data, error } = await supabase
@@ -250,7 +331,7 @@ export const fetchStudyMaterials = async () => {
     .order('uploaded_at', { ascending: false });
 
   if (error) throw error;
-  return data as StudyMaterial[];
+  return (data as any[]).map(fromDbMaterial);
 };
 
 export const createStudyMaterial = async (
@@ -261,7 +342,7 @@ export const createStudyMaterial = async (
     .insert([
       {
         id: `sm${Date.now()}`,
-        ...material,
+        ...toDbMaterial(material),
         uploaded_at: new Date().toISOString(),
       },
     ])
@@ -269,7 +350,7 @@ export const createStudyMaterial = async (
     .single();
 
   if (error) throw error;
-  return data as StudyMaterial;
+  return fromDbMaterial(data);
 };
 
 export const deleteStudyMaterial = async (id: string) => {
